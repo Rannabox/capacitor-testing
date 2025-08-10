@@ -24,6 +24,8 @@ export default function CapacitorFeatures() {
   async function testGeolocation() {
     try {
       const { Geolocation } = await import("@capacitor/geolocation");
+      //permission check is handled by Capacitor
+     
       const pos = await Geolocation.getCurrentPosition();
       setGeoResult(`Lat: ${pos.coords.latitude}, Lng: ${pos.coords.longitude}`);
     } catch (err) {
@@ -31,16 +33,27 @@ export default function CapacitorFeatures() {
     }
   }
 
-  async function testPush() {
-    try {
-      const { PushNotifications } = await import("@capacitor/push-notifications");
-      await PushNotifications.requestPermissions();
-      await PushNotifications.register();
-      setPushResult("Push notification permission requested.");
-    } catch (err) {
-      setPushResult("Push error: " + err);
-    }
+async function testPush() {
+  try {
+    const { LocalNotifications } = await import("@capacitor/local-notifications");
+    await LocalNotifications.requestPermissions();
+
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          title: "Test Notification",
+          body: "This is a local notification!",
+          id: 1,
+          schedule: { at: new Date(Date.now() + 1000) }, // 1 second later
+        },
+      ],
+    });
+
+    setPushResult("Local notification scheduled!");
+  } catch (err) {
+    setPushResult("Local notification error: " + err);
   }
+}
 
   return (
     <div className="flex flex-col gap-4">
